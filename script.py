@@ -72,10 +72,13 @@ def generate_main_line(line, main_line_count):
 def put_expand_collapse(current_line, next_line):
     """
     Function to identify and prepend expand collapse signs to line
+    and return the indentation
 
     Args:
         current_line(string) - Current Line
         next_line(string) - Next Line
+
+    Returns (int): indentation
     """
     current_line_dot_count = current_line.count(Sign.DOT)
     next_line_dot_count = next_line.count(Sign.DOT)
@@ -85,6 +88,8 @@ def put_expand_collapse(current_line, next_line):
     else:
         print ' ' * current_line_dot_count + Sign.PLUS + current_line
 
+    return next_line_dot_count
+
 
 def parse_file():
     """
@@ -92,6 +97,7 @@ def parse_file():
     """
     current_line = next(genr, None)
     main_line_count = 0
+    indentation_count = 0
     while current_line:
         next_line = next(genr, None)
         while next_line is not None and not next_line.strip():
@@ -100,11 +106,11 @@ def parse_file():
             main_line_count = generate_main_line(current_line, main_line_count)
         elif Sign.DOT in current_line:
             if not next_line:
-                put_expand_collapse(current_line, '')
+                indentation_count = put_expand_collapse(current_line, '')
             elif Sign.DOT in next_line:
-                put_expand_collapse(current_line, next_line)
+                indentation_count = put_expand_collapse(current_line, next_line)
             elif Sign.ASTERISK in next_line:
-                put_expand_collapse(current_line, '')
+                indentation_count = put_expand_collapse(current_line, '')
             elif Sign.ASTERISK not in next_line and Sign.DOT not in next_line:
                 next_line_lst = []
 
@@ -113,15 +119,14 @@ def parse_file():
                     next_line = next(genr, None)
 
                 if not next_line:
-                    put_expand_collapse(current_line, '')
+                    indentation_count = put_expand_collapse(current_line, '')
                 elif Sign.DOT in next_line:
-                    put_expand_collapse(current_line, next_line)
+                    indentation_count = put_expand_collapse(current_line, next_line)
                 elif Sign.ASTERISK in next_line:
-                    put_expand_collapse(current_line, '')
+                    indentation_count = put_expand_collapse(current_line, '')
                 for line in next_line_lst:
                     if line.strip():
-                        print line
-
+                        print ' ' * (indentation_count+1) + line
             elif Sign.DOT in current_line:
                 put_expand_collapse(current_line, '')
             else:
